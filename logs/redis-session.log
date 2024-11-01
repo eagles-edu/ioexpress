@@ -1,0 +1,42 @@
+
+  =============================================
+  Session Activity:
+    - Time: 2024-11-01 18:58:12 +07
+    - SessionID: kZ5AUE15DsULZHVar1QFr0RKhejHkkgZ
+    - Method: POST
+    - URL: /api/csp-violation
+    - IP: ::ffff:127.0.0.1
+    - UserAgent: curl/7.81.0
+    - Referer: None
+    - Created: 2024-11-01 18:58:12 +07
+    - Expires: 2024-11-01 19:58:12 +07
+    - Last Access: 2024-11-01 18:58:12 +07
+  =============================================
+
+  =============================================
+  Session Activity:
+    - Time: 2024-11-01 18:58:54 +07
+    - SessionID: 424BmQLd_z9goP0Iv_4f-Y8pxKUBRmXP
+    - Method: POST
+    - URL: /api/set-session
+    - IP: ::ffff:127.0.0.1
+    - UserAgent: curl/7.81.0
+    - Referer: None
+    - Created: 2024-11-01 18:58:54 +07
+    - Expires: 2024-11-01 19:58:54 +07
+    - Last Access: 2024-11-01 18:58:54 +07
+  =============================================
+
+  =============================================
+  Session Activity:
+    - Time: 2024-11-01 19:01:55 +07
+    - SessionID: kHKSwcZ8nOZBv-Q_F5IdtHP3Vb1Sr3JR
+    - Method: POST
+    - URL: /api/set-session
+    - IP: ::ffff:127.0.0.1
+    - UserAgent: curl/7.81.0
+    - Referer: None
+    - Created: 2024-11-01 19:01:55 +07
+    - Expires: 2024-11-01 20:01:55 +07
+    - Last Access: 2024-11-01 19:01:55 +07
+  =============================================

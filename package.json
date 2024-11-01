@@ -1,0 +1,23 @@
+{
+  "name": "express-dev",
+  "version": "1.2.0",
+  "description": "Express server for obgyn.eaglesvn.club",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "connect-redis": "^7.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "ioredis": "5.4.1",
+    "moment-timezone": "^0.5.46",
+    "redis": "^4.7.0"
+  },
+  "keywords": ["redis session & log", "express server", "CSP violations log", "request log"],
+  "author": "Minh Son",
+  "license": "Copyright (c) 2023, The Eagles Club, Ltd., all rights reserved"
+}

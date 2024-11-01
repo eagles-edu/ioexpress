@@ -1,0 +1,8 @@
+
+  ========================================
+  CSP Violation Reported:
+    - Time: 2024-11-01 18:58:12 +07
+    - Document URI: https://example.com
+    - Violated Directive: script-src
+    - Blocked URI: inline
+  ========================================

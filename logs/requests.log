@@ -1,0 +1,30 @@
+
+  =============================================
+  Request Activity:
+    - Method: POST
+    - URL: /api/csp-violation
+    - Time: 2024-11-01 18:58:12 +07
+    - IP: ::ffff:127.0.0.1
+    - User-Agent: curl/7.81.0
+    - Referer: None
+  =============================================
+
+  =============================================
+  Request Activity:
+    - Method: POST
+    - URL: /api/set-session
+    - Time: 2024-11-01 18:58:54 +07
+    - IP: ::ffff:127.0.0.1
+    - User-Agent: curl/7.81.0
+    - Referer: None
+  =============================================
+
+  =============================================
+  Request Activity:
+    - Method: POST
+    - URL: /api/set-session
+    - Time: 2024-11-01 19:01:55 +07
+    - IP: ::ffff:127.0.0.1
+    - User-Agent: curl/7.81.0
+    - Referer: None
+  =============================================
