@@ -7,17 +7,29 @@ const moment = require('moment-timezone');
 const fs = require('fs');
 const path = require('path');
 
-// BEGIN: Redis Client Configuration
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:6380');
+// BEGIN: Redis Client Configuration with Custom Retry Strategy
+const redisClient = new Redis(process.env.REDIS_URL, {
+  retryStrategy: (times) => {
+    if (times >= 10) {
+      console.error('Max retries reached, stopping Redis reconnection attempts');
+      return null; // Stop retrying after 10 attempts
+    }
+    const delay = Math.min(times * 100, 2000); // Exponential backoff, capped at 2 seconds
+    console.log(`Retrying Redis connection in ${delay} ms...`);
+    return delay;
+  },
+});
 
+redisClient.on('connect', () => console.log('Connected to Redis with authentication'));
 redisClient.on('error', (err) => console.error('Redis connection error:', err));
+redisClient.on('close', () => console.log('Redis connection closed'));
 redisClient.on('reconnecting', () => console.log('Reconnecting to Redis...'));
-// END: Redis Client Configuration
+// END: Redis Client Configuration with Custom Retry Strategy
 
 // BEGIN: Session Configuration with Redis Store
 const sessionManager = session({
   store: new RedisStore({
-    client: redisClient,
+    client: redisClient, // Use ioredis client here
     ttl: 3600, // Session TTL in seconds (1 hour)
   }),
   secret: process.env.SESSION_SECRET || 'your-secret-key', // Use a secure secret
@@ -33,7 +45,6 @@ const sessionManager = session({
 // END: Session Configuration with Redis Store
 
 // BEGIN: Timestamp Middleware
-// Adds a creation timestamp when a session is created and updates last access time
 const sessionTimestampMiddleware = (req, res, next) => {
   if (req.session) {
     if (!req.session.createdAt) {
@@ -46,11 +57,9 @@ const sessionTimestampMiddleware = (req, res, next) => {
 // END: Timestamp Middleware
 
 // BEGIN: Session Logger Middleware
-// Logs session activity to a file and console with timestamps, IP, user agent, etc.
 const logsDir = path.join(__dirname, '../logs');
 const sessionLogFilePath = path.join(logsDir, 'redis-session.log');
 
-// Ensure logs directory exists
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir); // Create logs directory if it doesn't exist
 }
@@ -63,11 +72,9 @@ const sessionLogger = (req, res, next) => {
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const referer = req.headers['referer'] || 'None';
     const sessionCreation = req.session.createdAt || 'N/A';
-
     const sessionExpires = req.session.cookie.expires
       ? moment(req.session.cookie.expires).tz('Asia/Bangkok').format('YYYY-MM-DD HH:mm:ss z')
       : 'N/A';
-
     const lastAccess = req.session.lastAccess || 'Unknown';
 
     const logMessage = `
@@ -85,7 +92,6 @@ const sessionLogger = (req, res, next) => {
     - Last Access: ${lastAccess}
   =============================================
 `;
-    // Log to console (optional)
     console.log(logMessage);
 
     // Append log entry to redis-session.log asynchronously with error handling
@@ -100,5 +106,9 @@ const sessionLogger = (req, res, next) => {
 // END: Session Logger Middleware
 
 // BEGIN: Export Middleware Array
-module.exports = [sessionManager, sessionTimestampMiddleware, sessionLogger];
+module.exports = {
+  sessionManager,
+  sessionTimestampMiddleware,
+  sessionLogger,
+};
 // END: Export Middleware Array

@@ -6,3 +6,35 @@
     - Violated Directive: script-src
     - Blocked URI: inline
   ========================================
+
+  ========================================
+  CSP Violation Reported:
+    - Time: 2024-11-01 19:16:40 +07
+    - Document URI: https://example.com
+    - Violated Directive: script-src
+    - Blocked URI: inline
+  ========================================
+
+  ========================================
+  CSP Violation Reported:
+    - Time: 2024-11-02 02:07:58 +07
+    - Document URI: https://example.com
+    - Violated Directive: script-src
+    - Blocked URI: inline
+  ========================================
+
+  ========================================
+  CSP Violation Reported:
+    - Time: 2024-11-02 02:15:19 +07
+    - Document URI: https://example.com
+    - Violated Directive: script-src
+    - Blocked URI: inline
+  ========================================
+
+  ========================================
+  CSP Violation Reported:
+    - Time: 2024-11-02 02:45:22 +07
+    - Document URI: https://example.com
+    - Violated Directive: script-src
+    - Blocked URI: inline
+  ========================================

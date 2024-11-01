@@ -1,62 +1,84 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const errorHandler = require('./middleware/error-handler'); 
+const Redis = require('ioredis'); // Redis client that supports password authentication
+const session = require('express-session');
+const RedisStore = require('connect-redis').default;
+const errorHandler = require('./middleware/error-handler');
+const { sessionTimestampMiddleware, sessionLogger } = require('./middleware/session');  // Import custom middleware
 
-require('dotenv').config();
+require('dotenv').config();  // Load environment variables from .env file
 
-// Routes for CSP violations
-const cspRoutes = require('./routes/api'); // CSP logger routes
+// BEGIN: Redis Client Setup with Password
+const redisClient = new Redis({
+  host: process.env.REDIS_HOST || '127.0.0.1',
+  port: process.env.REDIS_PORT || 6380, // Redis server port (match Docker setup)
+  password: process.env.REDIS_PASSWORD, // Redis password from .env
+});
 
-// Session management and related middlewares
-const sessionManager = require('./middleware/session'); // Redis session manager (with timestamp and logger)
+// Redis connection logging
+redisClient.on('connect', () => console.log('Connected to Redis with authentication'));
+redisClient.on('error', (err) => console.error('Redis connection error:', err));
+// END: Redis Client Setup
 
-// General request logging
-const requestLog = require('./middleware/requests'); // Logs general request activity
-const logger = require('./middleware/logger'); // Logs request details
+// BEGIN: Express Session Configuration with Redis Store
+const sessionManager = session({
+  store: new RedisStore({ client: redisClient }), // Use Redis client with password for session store
+  secret: process.env.SESSION_SECRET || 'default-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true,                                // Prevent client-side JavaScript access to cookies
+    maxAge: 3600000,                               // 1-hour session expiration
+  },
+});
+// END: Session Management Configuration
 
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 8910;
-const NODE_ENV = process.env.NODE_ENV || 'development'; // Fallback to 'development' if not set
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Security middleware
-app.use(helmet()); // Secure HTTP headers
+app.use(helmet());           // Secure HTTP headers
 app.disable('x-powered-by'); // Disable X-Powered-By header for security
 
-// Apply logger middleware to log request details
-app.use(logger);
-
-// Apply request log middleware to log all requests
-app.use(requestLog);
+// Apply logging middleware
+app.use(require('./middleware/logger'));    // Logs request details
+app.use(require('./middleware/requests'));  // General request logging
 
 // CORS configuration
-app.use(
-  cors({
-    origin: NODE_ENV === 'production'
-      ? 'https://obgyn.eaglesvn.club' // Frontend domain for production
-      : 'http://127.0.0.1:3001',      // Frontend domain for development
-    methods: ['POST', 'GET'],         // Allowed methods
-    credentials: true                 // Allow session cookies in CORS
-  })
-);
+app.use(cors({
+  origin: NODE_ENV === 'production' ? 'https://obgyn.eaglesvn.club' : 'http://127.0.0.1:3001',
+  methods: ['POST', 'GET'],
+  credentials: true,  // Allow session cookies
+}));
 
 // Parse incoming JSON requests
-app.use(express.json()); // Ensure that the request body is parsed as JSON
+app.use(express.json());
 
-// Apply Redis session manager (which includes session logging and timestamp middleware)
+// Use Redis-backed session manager
+console.log('Initializing middleware');
 app.use(sessionManager);
+console.log('Session manager applied');
 
-// Define routes for handling CSP violations
-app.use('/api', cspRoutes);
+// Apply custom session timestamp and logger middleware
+app.use(sessionTimestampMiddleware);
+console.log('Session timestamp middleware applied');
 
-// Route for setting session data
+app.use(sessionLogger);
+console.log('Session logger middleware applied');
+
+// BEGIN: Routes
 app.post('/api/set-session', (req, res) => {
   try {
-    
     const sessionData = req.body.data;
 
     if (sessionData) {
-      req.session.data = sessionData; // Store the provided data in the session
+      req.session.data = sessionData;  // Store session data in Redis
       res.send({ message: 'Session data stored successfully' });
     } else {
       res.status(400).send({ error: 'No session data provided' });
@@ -67,10 +89,13 @@ app.post('/api/set-session', (req, res) => {
   }
 });
 
-// Apply error handler middleware after all routes
+app.use('/api', require('./routes/api'));
+// END: Routes
+
+// Custom error handler middleware
 app.use(errorHandler);
 
-// Start the server
+// Start Express server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} in ${NODE_ENV} mode`);
 });
